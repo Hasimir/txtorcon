@@ -4,6 +4,7 @@ from twisted.internet.task import react
 from twisted.internet.defer import inlineCallbacks, ensureDeferred
 from twisted.internet.endpoints import UNIXClientEndpoint
 
+import gpg
 import treq
 import txtorcon
 
@@ -41,7 +42,16 @@ async def main(reactor):
         agent=circ.web_agent(reactor, config.socks_endpoint(reactor)),
     )
     data = await resp.text()
+    c = gpg.Context(armor=True)
+    try:
+        import_result = c.key_import(data.encode())
+    except Exception as e:
+        import_result = c.key_import(data)
     print(data)
+
+# Perhaps print the import results instead.  Have a look at the examples here
+# for details:
+# https://dev.gnupg.org/source/gpgme/browse/master/lang/python/examples/howto/
 
 
 @react
